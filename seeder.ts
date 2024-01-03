@@ -4,14 +4,16 @@ const colors = require('colors');
 const dotenv = require('dotenv');
 import Colors = require('colors.ts');
 
+
 //load env vars
 dotenv.config({
     path:'./config/config.env'
 })
 
 //load models
-const Bootcamp = require('./models/Bootcamp')
-const Course = require('./models/Course')
+import { Course } from './models/Course';
+import { Bootcamp } from './models/Bootcamp';
+
 
 //connect to db
 mongoose.connect(process.env.MONGO_URI)
@@ -24,7 +26,7 @@ const courses = JSON.parse(fs.readFileSync(`${__dirname}/_data/courses.json`,'ut
 const importData = async()=>{
     try{
         await Bootcamp.create(bootcamps);
-        await Course.create(courses);
+        // await Course.create(courses);
          console.log('Data imported....'.green.inverse)
 
 

@@ -132,6 +132,11 @@ exports.deleteBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
     
 })`
 wrapper code automatically catches error and calls next(err)
+- after update fetch the udpated copy on the object:
+`course = await Course.findByIdAndUpdate(req.params.id, req.body,{
+        new: true, //after update fetch from database
+        runValidators:true
+    })`
 
 
 

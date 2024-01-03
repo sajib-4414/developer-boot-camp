@@ -1,11 +1,10 @@
 //exports.functionname this is the standard way of wriitng nodejs express apis
-
-import { Document } from "mongoose"
+//before 2016 syntax export {name} came.
 import { Entry } from "node-geocoder"
+import { Bootcamp, BootcampDocumentInterface } from "../models/Bootcamp"
 
 //its the standard before export {functionname} came in 2016. 
 const asyncHandler = require('../middleware/async')
-const Bootcamp = require('../models/Bootcamp')
 const ErrorResponseinstance = require('../utils/ErrorResponse')
 const geocoder = require('../utils/geocoder')
 
@@ -111,7 +110,7 @@ exports.getBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
 // @route POST /api/v1/bootcamps
 // @access Private
 exports.createBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
-    const bootcamp = await Bootcamp.create(req.body)
+    const bootcamp:BootcampDocumentInterface|null = await Bootcamp.create(req.body)
     res.status(201).json({
         success:true,
         data:bootcamp
@@ -128,7 +127,7 @@ exports.createBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
 //runValidators: true: This option tells Mongoose to run validators defined in the schema
 // when performing the update operation.
 exports.updateBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
-    const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
+    const bootcamp:BootcampDocumentInterface|null = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
         new: true,
         runValidators:true
     })
@@ -146,7 +145,7 @@ exports.updateBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
 // @route DELETE /api/v1/bootcamps/:id
 // @access Private
 exports.deleteBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
-    const bootcamp:Document = await Bootcamp.findById(req.params.id)
+    const bootcamp:BootcampDocumentInterface|null = await Bootcamp.findById(req.params.id)
     if(!bootcamp){
         return next(new ErrorResponseinstance(`Bootcamp not found with id of ${req.params.id}`,404))
     }

@@ -183,5 +183,7 @@ BootcampSchema.virtual('courses',{
     justOne: false
 });
 
+interface BootCampModelInterface extends mongoose.Model<BootcampDocumentInterface>{}
+const Bootcamp = mongoose.model<BootcampDocumentInterface, BootCampModelInterface>('Bootcamp', BootcampSchema);
 
-module.exports = mongoose.model('Bootcamp', BootcampSchema)
+export {Bootcamp}
