@@ -63,14 +63,21 @@ const getAvg = async function(this:any, bootcampId:string){
             averageCost:{$avg: '$tuition' }
         }
     }])
-    console.log(obj)
+    try{
+        await this.model('Bootcamp').findByIdAndUpdate(bootcampId,{
+            averageCost: Math.ceil(obj[0].averageCost/10)*10
+        })
+    }catch(err){
+        console.log(err)
+    }
 }
 CourseSchema.static('getAverageCost',getAvg)
 
 //Call getaveragecost after save
 CourseSchema.post('save', async function(this:any){
-    console.log('Post save hook running...'.blue)
-    this.constructor.getAverageCost()
+    // console.log('Post save hook running...'.blue)
+    // this.constructor.getAverageCost()
+    (this.constructor as typeof Course).getAverageCost(this.bootcamp)
 })
 
 //Call getaveragecost before remove
