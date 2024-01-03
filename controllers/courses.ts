@@ -2,6 +2,7 @@ import { NextFunction,Request,Response } from "express"
 import { Entry } from "node-geocoder"
 import { Course, CourseDocInterface } from "../models/Course"
 import { Bootcamp, BootcampDocumentInterface } from "../models/Bootcamp"
+import { IAdvancedResults, advancedResults } from './../middleware/advancedResult';
 
 // the standard before export {functionname} came in 2016. 
 //was exports.methodname
@@ -13,24 +14,20 @@ const ErrorResponse= require('../utils/ErrorResponse')
 // @route GET /api/v1/bootcamps/:bootcampId/courses
 // @access Public
 
-exports.getCourses = asyncHandler(async (req:Request, res:Response, next: NextFunction) => {
-    let query;
+exports.getCourses = asyncHandler(async (req:Request, res:Response & { advancedResults: IAdvancedResults }, next: NextFunction) => {
+
     if(req.params.bootcampId){
-        query = Course.find({bootcamp: req.params.bootcampId})
+        const courses = await Course.find({bootcamp: req.params.bootcampId})
+        res.status(200).json({
+            success: true, 
+            count: courses.length,
+            data: courses
+        })
     }
     else{
-        query = Course.find().populate({
-            path: 'bootcamp',
-            select: 'name description'
-        });
+        res.status(200).json(res.advancedResults)
     }
-
-    const courses = await query;
-    res.status(200).json({
-        success: true,
-        count: courses.length,
-        data: courses
-    })
+    
 })
 
 

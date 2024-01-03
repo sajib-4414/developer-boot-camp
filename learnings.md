@@ -140,16 +140,25 @@ wrapper code automatically catches error and calls next(err)
 
 
 
-#### Request, response handling in express
+### Request, response handling in express
 - to parse the request body or retrieve the request body from request, we need this middleware.
 //Body Parser
 //this helps parse the body from the requset body
 app.use(express.json())
 - mongodb mongoose orm allows to control the schema, types, objects at application level unlike relational db.
+- **Handling file upload**:
+  - install express file upload and file upload types
+  - create a upload directory, we created uploads/public directory
+  - now, we want the frontnend/api consumer to be able to access the image inside the public/uploads , i mean public reseources with the root url, then the folder name, for ex: image with root url/uploads like this, localhost:5000/uploads/file-name.jpg. Therefore we need to mount the public folder as static folder in server file. 
+  ```
+  //set static folder
+  app.use(express.static(path.join(__dirname,'public')))
+  ```
+  - Then follow the photo upload method of bootcamp route.
 
 
 
-#### Mongoose:
+## Mongoose:
 - update and get updated doc from db:
  `const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
         new: true,
@@ -298,18 +307,23 @@ BootcampSchema.pre('deleteOne', { document: true, query: false }, async function
 })
 if we call FindByIDAndDelete on bootcamp,
 //we have to call findbyid and delete seperately to have this hook in effect. 
+- used mongoose aggregate to auto update the average cost of a bootcamp when a course is added or removed.
+
+
 
 
 ##### ts vs js
 - ts class vs js class
-`class ErrorResponse extends Error{
+ ``` 
+ class ErrorResponse extends Error{
     statusCode: number; //for typescript classes, it must have the property before calling this.property name
     //in javascript, python its dynamically created when called this.,statuiscode in the constructor
     constructor(message:string, statusCode: number){
         super(message);
         this.statusCode = statusCode;
     }
-}`
+}
+ ```
 
 #### location
 - we will use node-geocoder with mapquest, mapquest retrieves the location from address string. 

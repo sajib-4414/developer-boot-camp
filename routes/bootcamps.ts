@@ -1,11 +1,16 @@
 const expressinstance = require('express');
+import { Bootcamp } from '../models/Bootcamp';
+import { advancedResults } from './../middleware/advancedResult';
 const {getBootcamp,
     getBootcamps,
     createBootcamp,
     deleteBootcamp, 
     updateBootcamp,
-    getBootcampsInRadius } 
+    getBootcampsInRadius,
+    bootcampPhotoUpload } 
 = require('../controllers/bootcamps')
+
+
 
 //include other resource routers
 const courseRouter = require('./courses')
@@ -21,8 +26,12 @@ router
 
 
 router
+.route('/:id/photo').put(bootcampPhotoUpload)
+
+
+router
 .route('/')
-.get(getBootcamps)
+.get(advancedResults(Bootcamp, 'courses'),getBootcamps)
 .post(createBootcamp)
 
 router
