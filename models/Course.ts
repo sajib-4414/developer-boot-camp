@@ -1,7 +1,18 @@
-const mongoose = require('mongoose');
+const mongoose2 = require('mongoose');
+import mongoose from "mongoose";
+import { BootcampDocumentInterface } from "./Bootcamp";
+export interface CourseDocInterface extends mongoose.Document{
+    title:string,
+    description:string,
+    weeks:string,
+    tuition: number;
+    minimumSkill:string;
+    scholashipAvailable:boolean;
+    createdAt:Date;
+    bootcamp:BootcampDocumentInterface;
+}
 
-
-const CourseSchema = new mongoose.Schema({
+const CourseSchema = new mongoose2.Schema({
     title: {
         type: String, 
         trim:true,
@@ -39,4 +50,4 @@ const CourseSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Course', CourseSchema)
+module.exports = mongoose2.model('Course', CourseSchema)

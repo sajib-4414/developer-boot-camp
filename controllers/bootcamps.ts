@@ -1,5 +1,6 @@
 //exports.functionname this is the standard way of wriitng nodejs express apis
 
+import { Document } from "mongoose"
 import { Entry } from "node-geocoder"
 
 //its the standard before export {functionname} came in 2016. 
@@ -7,6 +8,8 @@ const asyncHandler = require('../middleware/async')
 const Bootcamp = require('../models/Bootcamp')
 const ErrorResponseinstance = require('../utils/ErrorResponse')
 const geocoder = require('../utils/geocoder')
+
+
 // @desc Get all bootcamps
 // @route GET /api/v1/bootcamps
 // @access Public
@@ -31,7 +34,7 @@ exports.getBootcamps = asyncHandler(async (req:any, res:any, next:any)=>{
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match=>`$${match}`)
 
     //Finding resource
-    query = Bootcamp.find(JSON.parse(queryStr));
+    query = Bootcamp.find(JSON.parse(queryStr)).populate('courses');
 
     //Select Fields
     if(req.query.select){
@@ -143,10 +146,11 @@ exports.updateBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
 // @route DELETE /api/v1/bootcamps/:id
 // @access Private
 exports.deleteBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id)
+    const bootcamp:Document = await Bootcamp.findById(req.params.id)
     if(!bootcamp){
-        return next(new ErrorResponseinstance(`Bootcampt not found with id of ${req.params.id}`,404))
+        return next(new ErrorResponseinstance(`Bootcamp not found with id of ${req.params.id}`,404))
     }
+    await bootcamp.deleteOne();//will trigger the pre delete hook
     res.status(200).json({
         success:true,
         data:{}

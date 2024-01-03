@@ -246,6 +246,53 @@ url: {{URL}}/api/v1/bootcamps?limit=2&page=2
         data:bootcamps
     })
 `
+- populate only 2 fields of a sub object,
+`
+query = Course.find().populate({
+            path: 'bootcamp',
+            select: 'name description'
+        });`
+
+- mongoose virtual property:
+if you have 
+`course{
+    bootcamp:{}
+}`
+now you want reverse relationship, meaning for a bootcamp, you want to list all the courses assocaited with it,
+just for the response perpose(to show, but not keep in database), you use virtual property in bootcamp.
+`Bootscampschema = new mongoose.sehcmea({
+....
+},
+{
+    toJSON:{
+        virtuals:true
+    }, 
+    toObject:{
+        virtuals:true
+    }
+})
+
+//reverse populate with virtuals
+BootcampSchema.virtual('courses',{
+    ref: 'Course',
+    localField: '_id',
+    foreignField: 'bootcamp',
+    justOne: false
+});
+`
+include virtual properties when converting a document to JSON (toJSON) or a plain JavaScript object (toObject). Virtual properties in Mongoose are properties that are not stored in the database but are computed or derived from other properties.
+now to show it, you need to call populate
+query = Bootcamp.find(JSON.parse(queryStr)).populate('courses');
+- doing on delete cascade:
+delete courses when bootcamp is deleted:
+BootcampSchema.pre('deleteOne', { document: true, query: false }, async function (this: any, next:NextFunction) {
+    const bootcampId = this._id;
+    console.log(`Course being removed from bootcamp ${bootcampId}`)
+    await this.model('Course').deleteMany({bootcamp: bootcampId})
+    next()
+})
+if we call FindByIDAndDelete on bootcamp,
+//we have to call findbyid and delete seperately to have this hook in effect. 
 
 
 ##### ts vs js

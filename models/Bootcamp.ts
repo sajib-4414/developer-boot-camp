@@ -1,8 +1,37 @@
-const mongoose = require('mongoose');
 const slugify = require('slugify');
 const geocoder:Geocoder = require('../utils/geocoder')
-import  { Document } from "mongoose";
+import  mongoose from "mongoose";
 import { Entry, Geocoder } from "node-geocoder";
+export interface Location {
+    type: 'Point';
+    coordinates: [number, number];
+    formattedAddress: string;
+    street: string;
+    city: string;
+    state: string;
+    zipcode: string;
+    country: string;
+}
+
+export interface BootcampDocumentInterface extends mongoose.Document{
+    name:string,
+    slug:string,
+    description:string,
+    website: string;
+    phone:string,
+    email:string,
+    address?:string,
+    location:Location,
+    careers:string[],
+    averageRating:number,
+    averageCost:number,
+    photo:string,
+    housing:boolean,
+    jobAssistance:boolean,
+    jobGuarantee:boolean,
+    acceptGi:boolean,
+    createdAt:Date
+}
 
 const BootcampSchema = new mongoose.Schema({
     name: {
@@ -101,31 +130,58 @@ const BootcampSchema = new mongoose.Schema({
         type:Date,
         default: Date.now
     }
+},
+{
+    toJSON:{
+        virtuals:true
+    }, 
+    toObject:{
+        virtuals:true
+    }
 })
 
 //create bootcampt slug from the name
-BootcampSchema.pre('save', function(this: typeof BootcampSchema, next:any){
+BootcampSchema.pre('save', function(this: BootcampDocumentInterface, next:any){
     this.slug = slugify(this.name,{lower:true})
     next()
 })
 
 //Geocode & create location field
-BootcampSchema.pre('save', async function(this: typeof BootcampSchema, next:any){
-    const loc:Entry[] = await geocoder.geocode(this.address)
+BootcampSchema.pre('save', async function(this: BootcampDocumentInterface, next:any){
+    const loc:Entry[] = await geocoder.geocode(this.address!)
     this.location = {
         type: 'Point',
-        coordinates:[loc[0].longitude, loc[0].latitude], 
-        formattedAddress:loc[0].formattedAddress,
-        street: loc[0].streetName,
-        city:loc[0].city,
-        state:loc[0].state,
-        zipcode:loc[0].zipcode,
-        country:loc[0].countryCode,
+        coordinates:[loc[0].longitude!, loc[0].latitude!], 
+        formattedAddress:loc[0].formattedAddress!,
+        street: loc[0].streetName!,
+        city:loc[0].city!,
+        state:loc[0].state!,
+        zipcode:loc[0].zipcode!,
+        country:loc[0].countryCode!,
     }
     //do not save address in DB
     this.address = undefined
     next()
 })
+// cascade delete courses when a bootcamp is deleted
+//doing pre, as we need reference to the deleting bootcamp
+//post means deleted
+//but this will not Fire, if we call FindByIDAndDelete on bootcamp,
+//we have to call findbyid and delete seperately to have this hook in effect. 
+BootcampSchema.pre('deleteOne', { document: true, query: false }, async function (this: any, next:any) {
+    const bootcampId = this._id;
+    console.log(`Course being removed from bootcamp ${bootcampId}`)
+    await this.model('Course').deleteMany({bootcamp: bootcampId})
+    next()
+})
+
+//reverse populate with virtuals
+BootcampSchema.virtual('courses',{
+    ref: 'Course',
+    localField: '_id',
+    foreignField: 'bootcamp',
+    justOne: false
+});
 
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema)

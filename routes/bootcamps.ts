@@ -6,7 +6,14 @@ const {getBootcamp,
     updateBootcamp,
     getBootcampsInRadius } 
 = require('../controllers/bootcamps')
+
+//include other resource routers
+const courseRouter = require('./courses')
+
 const router = expressinstance.Router()
+
+// Reroute into other resource routers
+router.use('/:bootcampId/courses', courseRouter)
 
 router
 .route('/radius/:zipcode/:distance')
