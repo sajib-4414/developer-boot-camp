@@ -154,7 +154,32 @@ app.use(express.json())
   //set static folder
   app.use(express.static(path.join(__dirname,'public')))
   ```
-  - Then follow the photo upload method of bootcamp route.
+  - Then follow the photo upload method of bootcamp route..
+- send jwt token in cookie:
+  cookie properties secure false means it can be sent via http and https both. 
+    - install cookie parser
+    - in the server.js add app.use(cookiepersuer())
+    - in the controller, set it as 
+    ```
+    const jwtCookieExpire = process.env.JWT_COOKIE_EXPIRE;
+    if (!jwtCookieExpire) {
+        // Handle the case where JWT_COOKIE_EXPIRE is not defined
+        throw new Error('JWT_COOKIE_EXPIRE is not defined');
+    }
+    const options = {
+        expires: new Date(Date.now() + Number(jwtCookieExpire)*24*60*60*1000),
+        httpOnly: true
+    }
+    if(process.env.NODE_ENV === 'production'){
+        options.secure = true
+    }
+    res.status(statusCode)
+    .cookie('token',token, options)
+    .json({
+        success: true,
+        token
+    })
+    ```
 
 
 

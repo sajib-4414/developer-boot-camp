@@ -3,6 +3,7 @@ const dotenv = require('dotenv')
 const morgan = require('morgan')
 const colors = require('colors')
 import Colors = require('colors.ts');
+import cookieParser = require('cookie-parser');
 import fileUpload = require('express-fileupload');
 const errorHandlerInstance = require('./middleware/error')
 const connectDBinstance = require('./config/db')
@@ -16,6 +17,7 @@ connectDBinstance()
 //Route files
 const bootcamps = require('./routes/bootcamps')
 const courses = require('./routes/courses')
+const auth = require('./routes/auth')
 
 
 const app = express();
@@ -23,6 +25,9 @@ const app = express();
 //Body Parser
 //this helps parse the body from the requset body
 app.use(express.json())
+
+//cookie parser
+app.use(cookieParser())
 
 //app.use(middleware) means this middleware will run for all requests now.
 //I think i also declared middleware in ticketing project, there i passed it in  the request response
@@ -43,6 +48,7 @@ app.use(express.static(path.join(__dirname,'public')))
 //mount routers
 app.use('/api/v1/bootcamps', bootcamps)
 app.use('/api/v1/courses', courses)
+app.use('/api/v1/auth', auth)
 
 //mount error handler then
 app.use(errorHandlerInstance)
