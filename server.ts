@@ -4,9 +4,15 @@ const morgan = require('morgan')
 const colors = require('colors')
 import Colors = require('colors.ts');
 import cookieParser = require('cookie-parser');
+import helmet from "helmet";
+const xss = require('xss-clean')
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp')
+const cors = require('cors')
 import fileUpload = require('express-fileupload');
 const errorHandlerInstance = require('./middleware/error')
 const connectDBinstance = require('./config/db')
+const mongoSanitize = require('express-mongo-sanitize');
 import * as path from 'path';
 //load env vars
 dotenv.config({path:'./config/config.env'})
@@ -20,6 +26,7 @@ const courses = require('./routes/courses')
 const auth = require('./routes/auth')
 const users = require('./routes/users')
 const reviews = require('./routes/reviews')
+
 
 const app = express();
 
@@ -42,6 +49,28 @@ if(process.env.NODE_ENV === 'development'){
 
 //File upload
 app.use(fileUpload())
+
+//sanitize data
+app.use(mongoSanitize());
+
+//set secuirty headers
+app.use(helmet())
+
+//prevent cross site scripting
+app.use(xss())
+
+//Rate limitin g
+const limiter = rateLimit({
+    windowMs: 10*60*1000,//10 minutes
+    max:100
+})
+app.use(limiter)
+
+//prevent http param polution
+app.use(hpp())
+
+//enable CORS 
+app.use(cors())
 
 //set static folder
 app.use(express.static(path.join(__dirname,'public')))
