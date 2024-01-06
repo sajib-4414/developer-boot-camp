@@ -6,7 +6,8 @@ export interface IAdvancedResults {
     data: any[]; // Adjust this based on the actual structure of your data
     pagination:any
 }
-export const advancedResults = (model:any, populate:any)=> async (req:any, res: Response & { advancedResults: IAdvancedResults }, next: NextFunction) =>{
+export const advancedResults = (model:any, populate?:any)=> async (req:any, res: Response & { advancedResults: IAdvancedResults }, next: NextFunction) =>{
+    console.log("here.................")
     let query;
 
     //copy request.query
@@ -62,6 +63,8 @@ export const advancedResults = (model:any, populate:any)=> async (req:any, res: 
     }
     //Executing query
     const results = await query;
+    console.log("inside results are....")
+    console.log(results)
 
     //pagination result
     const pagination:any = {};

@@ -1,4 +1,4 @@
-import { advancedResults } from "../middleware/advancedResult";
+
 import { Course } from "../models/Course";
 
 const express = require('express');
@@ -8,6 +8,7 @@ const router = express.Router({
     mergeParams: true
 })
 
+import { advancedResults } from "../middleware/advancedResult";
 const {protect, authorize} = require('../middleware/auth')
 
 router

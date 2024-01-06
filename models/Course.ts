@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { BootcampDocumentInterface } from "./Bootcamp";
 import Colors = require('colors.ts');
+import { UserDoc } from "./User";
 const colors = require('colors');
 export interface CourseDocInterface extends mongoose.Document{
     title:string,
@@ -11,6 +12,7 @@ export interface CourseDocInterface extends mongoose.Document{
     scholashipAvailable:boolean;
     createdAt:Date;
     bootcamp:BootcampDocumentInterface;
+    user: UserDoc|string;
 }
 
 const CourseSchema = new mongoose.Schema<CourseDocInterface, CourseModelInterface>({
@@ -47,6 +49,11 @@ const CourseSchema = new mongoose.Schema<CourseDocInterface, CourseModelInterfac
     bootcamp:{
         type: mongoose.Schema.ObjectId,
         ref:'Bootcamp',
+        required:true
+    },
+    user:{
+        type: mongoose.Schema.ObjectId,
+        ref:'User',
         required:true
     }
 })

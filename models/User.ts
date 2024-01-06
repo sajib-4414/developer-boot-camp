@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import  brcypt  from "bcryptjs";
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto';
 export interface UserDoc extends mongoose.Document {
     name: string;
     email: string;
@@ -11,6 +12,7 @@ export interface UserDoc extends mongoose.Document {
     createdAt?: Date;
     // Add the method to the interface
     getSignedJWTToken: () => string;
+    getResetPasswordToken:()=>string;
     matchPassword: (password:string) => boolean;
 }
 
@@ -49,6 +51,9 @@ const userSchema = new mongoose.Schema({
 
 //Encrypt password using brcypt
 userSchema.pre('save', async function (next) {
+    if(!this.isModified('password')){
+        next()
+    }
     const salt = await brcypt.genSalt(10)
     this.password = await brcypt.hash(this.password,salt)
 })
@@ -66,6 +71,20 @@ userSchema.methods.getSignedJWTToken = function(){
 //match user entered password
 userSchema.methods.matchPassword = async function(enteredPassword:string){
     return await brcypt.compare(enteredPassword, this.password)
+    
+}
+
+//generate a hash password token
+userSchema.methods.getResetPasswordToken = async function(){
+    //generate token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    //hash token and set to reset password field
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    //set expire
+    this.resetPasswordExpire = Date.now()+ 10*60*1000;
+    return resetToken
     
 }
 

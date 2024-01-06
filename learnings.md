@@ -180,9 +180,26 @@ app.use(express.json())
         token
     })
     ```
+- maintain ownership: we check if the req.user from the middleware is the user assocaited with a bootcamp
+- **reset password how**? we have a reset password token and token expiry in user model date.now + 10min, we generate a token, hash it, store it, but return to the user regular version, we will hash it again when user hits api, to match with the stored hash, if that hashes we let the user change password. we also check if the expiry is not over before allowing user to reset password with that token. once reset password iss done, or the reset passowrd link api with the token does a 500 error, we delete the resetpasswordtoken and expiry from the user model, to let user try again and cleanup. 
+- router apply middlware per url vs for all urls.
+router.use(protect) //protects all the routes below
+router.use(authorize('admin'))//protects all the routes below
 
-
-
+router
+.route('/:id/photo').put(protect, authorize('publisher','admin'), bootcampPhotoUpload)//protects only this route
+- reroute nested routes:
+we could have routes like {{URL}}/api/v1/bootcamps/5d725a1b7b292f5f8ceff788/reviews/ or ../reviews/reviewid
+if we want to handle these routes in the reviews or say /courses in coruses routes
+we can reroute them from the bootcamp route file
+// Reroute into other resource routers
+router.use('/:bootcampId/courses', courseRouter)
+router.use('/:bootcampId/reviews', reviewRouter)
+and in the course reouter,
+const router = express.Router({
+    mergeParams: true
+})
+now the course router should be able to handle the routes.
 ## Mongoose:
 - update and get updated doc from db:
  `const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
@@ -333,8 +350,39 @@ BootcampSchema.pre('deleteOne', { document: true, query: false }, async function
 if we call FindByIDAndDelete on bootcamp,
 //we have to call findbyid and delete seperately to have this hook in effect. 
 - used mongoose aggregate to auto update the average cost of a bootcamp when a course is added or removed.
+also for review.
+const getAvgRating = async function(this:any, bootcampId:string){
+    const obj = await this.aggregate([{
+        $match: { bootcamp: bootcampId}
+    },
+    {
+        $group:{
+            _id: '$bootcamp',
+            averageRating:{$avg: '$rating' }
+        }
+    }])
+    try{
+        await this.model('Bootcamp').findByIdAndUpdate(bootcampId,{
+            averageRating: obj[0].averageRating
+        })
+    }catch(err){
+        console.log(err)
+    }
+}
+ReviewSchema.static('getAverageRating',getAvgRating)
 
+//Call getaveragecost after save
+ReviewSchema.post('save', async function(this:any){
+    // console.log('Post save hook running...'.blue)
+    // this.constructor.getAverageCost()
+    (this.constructor as typeof Review).getAverageRating(this.bootcamp)
+})
 
+- incldue a field to get from mongo which is excldued in the model, with +
+const user:UserDoc = await User.findById(req.user.id).select('+password')
+- allow only one review of a bootcamp per user
+ReviewSchema.index ({bootcamp:1, user:1}, {unique:true})
+but this does not work sometimes
 
 
 ##### ts vs js
@@ -353,3 +401,6 @@ if we call FindByIDAndDelete on bootcamp,
 #### location
 - we will use node-geocoder with mapquest, mapquest retrieves the location from address string. 
 - we will do a radius based search
+
+
+### API security:

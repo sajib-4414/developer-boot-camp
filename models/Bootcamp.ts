@@ -2,6 +2,7 @@ const slugify = require('slugify');
 const geocoder:Geocoder = require('../utils/geocoder')
 import  mongoose from "mongoose";
 import { Entry, Geocoder } from "node-geocoder";
+import { UserDoc } from "./User";
 export interface Location {
     type: 'Point';
     coordinates: [number, number];
@@ -30,7 +31,8 @@ export interface BootcampDocumentInterface extends mongoose.Document{
     jobAssistance:boolean,
     jobGuarantee:boolean,
     acceptGi:boolean,
-    createdAt:Date
+    createdAt:Date,
+    user:UserDoc|string
 }
 
 const BootcampSchema = new mongoose.Schema({

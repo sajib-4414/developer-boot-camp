@@ -69,13 +69,20 @@ exports.createBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
 //runValidators: true: This option tells Mongoose to run validators defined in the schema
 // when performing the update operation.
 exports.updateBootcamp = asyncHandler(async (req:any, res:any, next:any)=>{
-    const bootcamp:BootcampDocumentInterface|null = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
-        new: true,
-        runValidators:true
-    })
+    let bootcamp:BootcampDocumentInterface|null = await Bootcamp.findById(req.params.id)
     if(!bootcamp){
         return next(new ErrorResponseinstance(`Bootcampt not found with id of ${req.params.id}`,404))
     }
+    // console.log(bootcamp)
+    //make sure user is bootcamp owner
+    if(bootcamp.user.toString() !== req.user.id && req.user.role !=='admin'){
+        return next(new ErrorResponseinstance(`User ${req.params.id} is not authorized to update this bootcamp`,403))
+    }
+
+    bootcamp = await Bootcamp.findOneAndUpdate({_id:req.params.id}, req.body,{
+        new: true,
+        runValidators:true
+    })
     res.status(200).json({
         success:true,
         data:bootcamp
@@ -91,6 +98,12 @@ exports.deleteBootcamp = asyncHandler(async (req:any, res:any, next:NextFunction
     if(!bootcamp){
         return next(new ErrorResponseinstance(`Bootcamp not found with id of ${req.params.id}`,404))
     }
+
+    //make sure user is bootcamp owner
+    if(bootcamp.user.toString() !== req.user.id && req.user.role !=='admin'){
+        return next(new ErrorResponseinstance(`User ${req.params.id} is not authorized to delete this bootcamp`,403))
+    }
+
     await bootcamp.deleteOne();//will trigger the pre delete hook
     res.status(200).json({
         success:true,
@@ -130,10 +143,15 @@ exports.getBootcampsInRadius = asyncHandler(async (req:any, res:any, next:any)=>
 // @route PUT /api/v1/bootcamps/:id/photo
 // @access Private
 
-exports.bootcampPhotoUpload = asyncHandler(async (req:Request, res:Response, next:NextFunction)=>{
+exports.bootcampPhotoUpload = asyncHandler(async (req:any, res:Response, next:NextFunction)=>{
     const bootcamp:BootcampDocumentInterface|null = await Bootcamp.findById(req.params.id)
     if(!bootcamp){
         return next(new ErrorResponseinstance(`Bootcamp not found with id of ${req.params.id}`,404))
+    }
+
+     //make sure user is bootcamp owner
+     if(bootcamp.user.toString() !== req.user.id && req.user.role !=='admin'){
+        return next(new ErrorResponseinstance(`User ${req.params.id} is not authorized to delete this bootcamp`,403))
     }
     
     if(!req.files){

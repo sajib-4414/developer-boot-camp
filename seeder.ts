@@ -14,6 +14,7 @@ dotenv.config({
 import { Course } from './models/Course';
 import { Bootcamp } from './models/Bootcamp';
 import { User } from './models/User';
+import { Review } from './models/Review';
 
 
 //connect to db
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 const bootcamps = JSON.parse(fs.readFileSync(`${__dirname}/_data/bootcamps.json`,'utf-8'))
 const courses = JSON.parse(fs.readFileSync(`${__dirname}/_data/courses.json`,'utf-8'))
 const users = JSON.parse(fs.readFileSync(`${__dirname}/_data/users.json`,'utf-8'))
+const reviews = JSON.parse(fs.readFileSync(`${__dirname}/_data/reviews.json`,'utf-8'))
 
 //import into db
 const importData = async()=>{
@@ -30,6 +32,7 @@ const importData = async()=>{
         await Bootcamp.create(bootcamps);
         await Course.create(courses);
         await User.create(users);
+        await Review.create(reviews);
          console.log('Data imported....'.green.inverse)
 
 
@@ -45,6 +48,7 @@ const deleteData = async()=>{
         await Bootcamp.deleteMany()//no option mean it will delete all of the data
         await Course.deleteMany()//no option mean it will delete all of the data
         await User.deleteMany()//no option mean it will delete all of the data
+        await Review.deleteMany()//no option mean it will delete all of the data
         console.log('Data deleted....'.red.inverse)
 
 

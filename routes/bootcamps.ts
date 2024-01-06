@@ -1,6 +1,6 @@
 const expressinstance = require('express');
 import { Bootcamp } from '../models/Bootcamp';
-import { advancedResults } from './../middleware/advancedResult';
+
 const {getBootcamp,
     getBootcamps,
     createBootcamp,
@@ -14,13 +14,16 @@ const {getBootcamp,
 
 //include other resource routers
 const courseRouter = require('./courses')
+const reviewRouter = require('./reviews')
 
 const router = expressinstance.Router()
 
+import { advancedResults } from './../middleware/advancedResult';
 const {protect, authorize} = require('../middleware/auth')
 
 // Reroute into other resource routers
 router.use('/:bootcampId/courses', courseRouter)
+router.use('/:bootcampId/reviews', reviewRouter)
 
 router
 .route('/radius/:zipcode/:distance')

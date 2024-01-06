@@ -11,6 +11,12 @@ declare global {
       JWT_SECRET:string;
       JWT_EXPIRE:string;
       JWT_COOKIE_EXPIRE:number;
+      SMTP_HOST:string;
+      SMTP_PORT:number
+      SMTP_EMAIL:string;
+      SMTP_PASSWORD:string;
+      FROM_EMAIL:string;
+      FROM_NAME:string;
     }
   }
 }
